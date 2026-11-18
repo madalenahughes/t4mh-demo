@@ -66,9 +66,12 @@ def draw():
     print("\nCardiovascular / HRV")
     print("-" * 60)
     print(f"{'RMSSD':<24}{fmt('polar', 'rmssd_ms', 1)} ms")
-    print(f"{'Baseline RMSSD':<24}{fmt('polar', 'baseline_rmssd_ms', 1)} ms")
-    print(f"{'Change from baseline':<24}{fmt_signed('polar', 'delta_rmssd_ms', 1)} ms")
-    print(f"{'RMSSD z-score':<24}{fmt('polar', 'rmssd_z', 3)}")
+    if latest.get('polar', {}).get('baseline_enabled') is False:
+        print("Monitoring only — no baseline required")
+    else:
+        print(f"{'Baseline RMSSD':<24}{fmt('polar', 'baseline_rmssd_ms', 1)} ms")
+        print(f"{'Change from baseline':<24}{fmt_signed('polar', 'delta_rmssd_ms', 1)} ms")
+        print(f"{'RMSSD z-score':<24}{fmt('polar', 'rmssd_z', 3)}")
 
     print("\nEEG / FAA / FBA")
     print("-" * 60)

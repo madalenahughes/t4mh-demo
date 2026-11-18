@@ -57,6 +57,19 @@ class StreamTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(stopped)
         return values
 
+    async def test_no_baseline_uses_shared_filtered_stream(self):
+        calls = []
+        async def shared_stream(**kwargs):
+            calls.append(kwargs)
+            yield types.SimpleNamespace(rmssd_ms=12.5)
+        with patch.dict(sys.modules, bleak=types.SimpleNamespace(BleakError=Exception, BleakClient=object, BleakScanner=object)):
+            module = load_module('monitor_bridge', SOURCE / 'polar_hrv.py')
+        with patch.dict(sys.modules, t4mh_shared_rr_processing=types.SimpleNamespace(rmssd_stream=shared_stream)):
+            gen = module.rmssd_z_stream(baseline_duration_s=0, include_baseline=True)
+            self.assertEqual(await gen.__anext__(), (12.5, None, None, None))
+            await gen.aclose()
+        self.assertEqual(calls, [{'baseline_duration_s':None, 'rr_window_size':20}])
+
     async def test_default_still_returns_two_values(self):
         result = (await self.samples(False, [32, 32, 32, 64], 2, 1))[0]
         self.assertEqual(len(result), 2)
@@ -83,6 +96,26 @@ class StreamTests(unittest.IsolatedAsyncioTestCase):
         self.assertAlmostEqual(result[1], 5)
 
 
+class SharedTrackerTests(unittest.TestCase):
+    def test_monitor_waits_for_window_rejects_artifacts_and_never_collects_baseline(self):
+        name = 'real_shared_tracker_test'
+        spec = importlib.util.spec_from_file_location(name, SOURCE.parent / 'music/polar_hrv.py')
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        tracker = module.RMSSDTracker(None, 20)
+        self.assertIsNone(tracker.feed([800, 810, 800], 0))
+        sample = tracker.feed([810, 800] * 9, 1)
+        self.assertAlmostEqual(sample.rmssd_ms, 10)
+        self.assertIsNone(sample.baseline_ms)
+        tracker.feed([4000], 2)
+        self.assertEqual(tracker.rejected, 1)
+        for t in range(3, 100): tracker.feed([800, 810], t)
+        self.assertEqual(tracker.baseline_values, [])
+        self.assertIsNone(tracker.baseline_ms)
+        self.assertIsNone(tracker.feed([800], 110))
+
+
 class RecorderTests(unittest.IsolatedAsyncioTestCase):
     async def test_csv_udp_and_console_keep_raw_change_before_z(self):
         options = []
@@ -97,7 +130,7 @@ class RecorderTests(unittest.IsolatedAsyncioTestCase):
                 module = load_module('tested_recorder', SOURCE / 'polar_record.py')
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 path = await module.record()
-            self.assertEqual(options, [{'include_baseline': True}])
+            self.assertEqual(options, [{'baseline_duration_s': 0, 'include_baseline': True}])
             with open(path, newline='') as f:
                 rows = list(csv.DictReader(f))
             self.assertEqual(list(rows[0]), ['unix_time_s', 'elapsed_s', 'rmssd_ms',
@@ -106,15 +139,30 @@ class RecorderTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(float(rows[1]['delta_rmssd_ms']), -10)
             self.assertEqual(float(rows[0]['baseline_rmssd_ms']), 30)
             messages = [json.loads(call.args[0]) for call in sock.sendto.call_args_list]
-            self.assertEqual(messages[0], {'sensor':'polar', 'rmssd_ms':40,
+            self.assertEqual(messages[0], {'sensor':'polar', 'baseline_enabled':True, 'rmssd_ms':40,
                              'baseline_rmssd_ms':30, 'delta_rmssd_ms':10, 'rmssd_z':2})
             self.assertEqual(messages[1]['delta_rmssd_ms'], -10)
             self.assertTrue(all(call.args[1] == ('127.0.0.1', 15000)
                                 for call in sock.sendto.call_args_list))
             text = out.getvalue()
-            self.assertIn('change= +10.00 ms', text)
-            self.assertLess(text.index('change='), text.index('z='))
+            self.assertIn('RMSSD=  40.00 ms', text)
             module.integration_sock.close()
+
+    async def test_no_baseline_csv_blanks_and_udp_nulls(self):
+        async def stream(**kwargs):
+            yield (40, None, None, None)
+        sock = MagicMock()
+        with tempfile.TemporaryDirectory() as td:
+            with patch.dict(sys.modules, polar_hrv=types.SimpleNamespace(rmssd_z_stream=stream)), patch('socket.socket', return_value=sock), patch.dict(__import__('os').environ, {'T4MH_DATA_DIR': td}):
+                module = load_module('tested_no_baseline', SOURCE / 'polar_record.py')
+            with contextlib.redirect_stdout(io.StringIO()):
+                path = await module.record()
+            with open(path) as f:
+                row = next(csv.DictReader(f))
+            self.assertEqual(row['baseline_rmssd_ms'], '')
+            message = json.loads(sock.sendto.call_args.args[0])
+            self.assertIsNone(message['rmssd_z'])
+            self.assertFalse(message['baseline_enabled'])
 
     async def test_stream_failure_leaves_flushed_csv(self):
         async def stream(**kwargs):

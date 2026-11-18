@@ -7,7 +7,7 @@ Polar H10 acquisition-only recorder for feedforward experiments.
 
 - Uses the existing rmssd_z_stream() processing pipeline
 - Does NOT control or start audio
-- Publishes RMSSD, baseline, signed change in ms, and retained z-score
+- Publishes live RMSSD without a baseline wait; reference statistics are unavailable
 - Saves timestamped RMSSD data to CSV
 - Does NOT fall back to simulated data
 """
@@ -52,10 +52,11 @@ def publish_to_integration(rmssd_ms, rmssd_z, baseline_rmssd_ms, delta_rmssd_ms)
 
     message = {
         "sensor": "polar",
+        "baseline_enabled": baseline_rmssd_ms is not None,
         "rmssd_ms": float(rmssd_ms),
-        "baseline_rmssd_ms": float(baseline_rmssd_ms),
-        "delta_rmssd_ms": float(delta_rmssd_ms),
-        "rmssd_z": float(rmssd_z),
+        "baseline_rmssd_ms": (float(baseline_rmssd_ms) if baseline_rmssd_ms is not None else None),
+        "delta_rmssd_ms": (float(delta_rmssd_ms) if delta_rmssd_ms is not None else None),
+        "rmssd_z": (float(rmssd_z) if rmssd_z is not None else None),
     }
 
     integration_sock.sendto(
@@ -105,7 +106,7 @@ async def record():
 
         log_file.flush()
 
-        async for result in rmssd_z_stream(include_baseline=True):
+        async for result in rmssd_z_stream(baseline_duration_s=0, include_baseline=True):
 
             # All values come from the same fixed baseline in polar_hrv.py.
             rmssd_ms, rmssd_z, baseline_rmssd_ms, delta_rmssd_ms = result
@@ -121,9 +122,9 @@ async def record():
                 f"{unix_time:.6f}",
                 f"{elapsed:.6f}",
                 f"{float(rmssd_ms):.6f}",
-                f"{float(baseline_rmssd_ms):.6f}",
-                f"{float(delta_rmssd_ms):.6f}",
-                f"{float(rmssd_z):.6f}",
+                "" if baseline_rmssd_ms is None else f"{float(baseline_rmssd_ms):.6f}",
+                "" if delta_rmssd_ms is None else f"{float(delta_rmssd_ms):.6f}",
+                "" if rmssd_z is None else f"{float(rmssd_z):.6f}",
             ])
 
             log_file.flush()
@@ -137,17 +138,9 @@ async def record():
 
             sample_count += 1
 
-            print(
-                f"\r"
-                f"t={elapsed:7.1f}s   "
-                f"RMSSD={float(rmssd_ms):7.2f} ms   "
-                f"baseline={float(baseline_rmssd_ms):7.2f} ms   "
-                f"change={float(delta_rmssd_ms):+7.2f} ms   "
-                f"z={float(rmssd_z):+7.3f}   "
-                f"n={sample_count}",
-                end="",
-                flush=True
-            )
+            print(f"\rt={elapsed:7.1f}s   RMSSD={float(rmssd_ms):7.2f} ms   n={sample_count}",
+                  end="", flush=True)
+
 
     return log_path
 

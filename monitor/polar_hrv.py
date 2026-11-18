@@ -76,7 +76,7 @@ async def find_polar_device(timeout: float = 15.0):
     return device
 
 
-async def rmssd_z_stream(
+async def _legacy_rmssd_z_stream(
     baseline_duration_s: float = 60.0,
     rr_window_size: int = 20,
     *,
@@ -148,6 +148,11 @@ async def rmssd_z_stream(
         if rmssd is None:
             return
 
+        # Monitoring can stream immediately without inventing reference statistics.
+        if baseline_duration_s <= 0:
+            queue.put_nowait((rmssd * 1000.0, None, None, None))
+            return
+
         now = time.monotonic()
         if baseline_start is None:
             baseline_start = now
@@ -210,6 +215,37 @@ async def rmssd_z_stream(
     except BleakError as e:
         print(f"rmssd_z_stream: BLE error during connect: {e}")
         return
+
+
+async def rmssd_z_stream(baseline_duration_s=60.0, rr_window_size=20, *, include_baseline=False):
+    """Monitoring without a baseline shares the music demo's actual RR pipeline."""
+    if baseline_duration_s > 0:
+        stream = _legacy_rmssd_z_stream(baseline_duration_s, rr_window_size,
+                                        include_baseline=include_baseline)
+        try:
+            async for sample in stream:
+                yield sample
+        finally:
+            await stream.aclose()
+        return
+    import importlib.util
+    import sys
+    from pathlib import Path
+    name = "t4mh_shared_rr_processing"
+    if name not in sys.modules:
+        path = Path(__file__).resolve().parents[1] / "music" / "polar_hrv.py"
+        spec = importlib.util.spec_from_file_location(name, path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    shared = sys.modules[name]
+    stream = shared.rmssd_stream(baseline_duration_s=None, rr_window_size=rr_window_size)
+    try:
+        async for sample in stream:
+            values = (sample.rmssd_ms, None, None, None)
+            yield values if include_baseline else values[:2]
+    finally:
+        await stream.aclose()
 
 
 # Optional: simple test harness if you run this file directly

@@ -50,7 +50,7 @@ def parse_rr_ms(data):
 
 class RMSSDTracker:
     def __init__(self, baseline_duration_s=30.0, rr_window_size=20):
-        if baseline_duration_s <= 0 or rr_window_size < 5:
+        if (baseline_duration_s is not None and baseline_duration_s <= 0) or rr_window_size < 5:
             raise ValueError("Positive baseline duration and at least 5 RR slots required")
         self.duration = baseline_duration_s
         self.window = deque(maxlen=rr_window_size)
@@ -100,7 +100,7 @@ class RMSSDTracker:
         rmssd = compute_rmssd(values)
         if rmssd is None:
             return None
-        if self.baseline_ms is None:
+        if self.duration is not None and self.baseline_ms is None:
             if self.last_valid is not None:
                 self.baseline_elapsed += min(max(now - self.last_valid, 0), 2.0)
             self.baseline_values.append(rmssd)
@@ -145,7 +145,8 @@ async def rmssd_stream(baseline_duration_s=30.0, rr_window_size=20):
             queue.put_nowait(sample)
 
     async with BleakClient(device, timeout=30.0) as client:
-        print("Connected. Keep still for window warm-up and baseline; music is off.")
+        print("Connected. Keep still for RR window warm-up; monitoring has no baseline." if baseline_duration_s is None else
+              "Connected. Keep still for window warm-up and baseline; music is off.")
         await client.start_notify(HRM_CHAR_UUID, notified)
         try:
             last_valid = time.monotonic()
