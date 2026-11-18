@@ -1,0 +1,100 @@
+"""Constants for the Amaran Sidus integration."""
+
+DOMAIN = "amaran"
+
+DEFAULT_NAME = "Amaran Ace 25C"
+MANUFACTURER = "amaran"
+
+CONF_ACCOUNT = "account"
+CONF_ADDRESS = "address"
+CONF_APP_KEY = "app_key"
+CONF_BLE_MAC = "ble_mac"
+CONF_BATTERY_CAPABLE = "battery_capable"
+CONF_BATTERY_PERCENTAGE = "battery_percentage"
+CONF_DEVICE_UUID = "device_uuid"
+CONF_ENABLE_PRESENCE_CHECKING = "enable_presence_checking"
+CONF_FIXTURE_CATALOG = "fixture_catalog"
+CONF_FIXTURE_CODE = "fixture_code"
+CONF_FIXTURES = "fixtures"
+CONF_IMPORT_JSON = "import_json"
+CONF_IV_INDEX = "iv_index"
+CONF_MESH_UUID = "mesh_uuid"
+CONF_MODEL = "model"
+CONF_NAME = "name"
+CONF_NET_KEY = "net_key"
+CONF_NODE_ADDRESS = "node_address"
+CONF_PASSWORD = "password"
+CONF_PRODUCT_ID = "product_id"
+CONF_PROXY_ADDRESS = "proxy_address"
+CONF_PROXY_CANDIDATES = "proxy_candidates"
+CONF_PROXY_MAC = "proxy_mac"
+CONF_PROXY_SELECTION = "proxy_selection"
+CONF_SEQUENCE = "sequence"
+CONF_SELECTED_FIXTURE = "selected_fixture"
+CONF_SELECTED_FIXTURE_IDS = "selected_fixture_ids"
+CONF_SOURCE_ADDRESS = "source_address"
+CONF_SUPPORTED_COLOR_MODES = "supported_color_modes"
+CONF_TTL = "ttl"
+CONF_TRANSPORT_MODE = "transport_mode"
+
+DEFAULT_IV_INDEX = 0
+DEFAULT_NODE_ADDRESS = 2
+DEFAULT_SEQUENCE = 100000
+# Home Assistant's own mesh address. The amaran apps give lights addresses
+# counting up from 2, so the old default (15) collided with real lights.
+DEFAULT_SOURCE_ADDRESS = 0x7FFF
+LEGACY_SOURCE_ADDRESS = 0x000F
+# New setups pick their address from here unless this Home Assistant already
+# sends on that network. Lights drop messages whose counter is at or below the
+# last one seen from an address, so a fresh install must not reuse the address
+# of another install (every entry before 0.6.1 used DEFAULT_SOURCE_ADDRESS).
+SOURCE_ADDRESS_POOL = range(0x7000, DEFAULT_SOURCE_ADDRESS)
+DEFAULT_TTL = 7
+DEFAULT_ENABLE_PRESENCE_CHECKING = False
+DEFAULT_PRESENCE_UNAVAILABLE_AFTER_SECONDS = 120.0
+DEFAULT_PRESENCE_SCAN_INTERVAL_SECONDS = 60.0
+DEFAULT_PRESENCE_SCAN_DURATION_SECONDS = 10.0
+DEFAULT_STATE_POLL_INTERVAL_SECONDS = 30.0
+DEFAULT_BATTERY_POLL_INTERVAL_SECONDS = 60.0
+TRANSPORT_MODE_PERSISTENT = "persistent"
+
+PROXY_SELECTION_AUTO = "auto"
+PROXY_SELECTION_MANUAL = "manual"
+PROXY_SELECTIONS = (PROXY_SELECTION_AUTO, PROXY_SELECTION_MANUAL)
+DEFAULT_PROXY_SELECTION = PROXY_SELECTION_MANUAL
+DEFAULT_IMPORT_PROXY_SELECTION = PROXY_SELECTION_AUTO
+
+MIN_COLOR_TEMP_KELVIN = 2300
+MAX_COLOR_TEMP_KELVIN = 10000
+DEFAULT_COLOR_TEMP_KELVIN = 5600
+
+COLOR_MODE_COLOR_TEMP = "color_temp"
+COLOR_MODE_HS = "hs"
+COLOR_MODE_RGB = "rgb"
+COLOR_MODE_BRIGHTNESS = "brightness"
+
+TRANSPORT_STATE_DISCONNECTED = "disconnected"
+TRANSPORT_STATE_WARMING = "warming"
+TRANSPORT_STATE_PROXY_READY = "proxy_ready"
+TRANSPORT_STATE_RECONNECTING = "reconnecting"
+TRANSPORT_STATE_FAILED = "failed"
+TRANSPORT_STATE_UNREACHABLE = "unreachable"
+
+MESH_PROXY_IN_UUID = "00002add-0000-1000-8000-00805f9b34fb"
+MESH_PROXY_OUT_UUID = "00002ade-0000-1000-8000-00805f9b34fb"
+
+SIDUS_ACCESS_OPCODE = 0x26
+MESH_ALL_NODES_ADDRESS = 0xFFFF
+
+# Bluetooth Mesh proxy filter types (Mesh Profile 6.5). A reject (deny) list
+# that is left empty makes the proxy forward every message to us, which is how
+# the integration receives the light's status and battery reports.
+PROXY_FILTER_TYPE_ACCEPT = 0x00
+PROXY_FILTER_TYPE_REJECT = 0x01
+
+SERVICE_REQUEST_POWER_STATUS = "request_power_status"
+SERVICE_FIELD_ENTRY_ID = "entry_id"
+SERVICE_FIELD_NODE_ADDRESS = "node_address"
+SERVICE_FIELD_CAPTURE_SECONDS = "capture_seconds"
+DEFAULT_POWER_STATUS_CAPTURE_SECONDS = 10.0
+

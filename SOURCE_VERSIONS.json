@@ -1,0 +1,64 @@
+{
+  "description": "Working Pi sources collected 2026-11-17; no recordings or secrets included.",
+  "source_files": {
+    "monitor/integration.py": "b1011c403f4b1c94186dbe873302ddfa5a74574e3796b11d13156b23b930d10c",
+    "monitor/polar_record.py": "bde2af6f1ac5d5e4c1b3093e74d2843dbc8eb576214f566c43659de98aa6d9a8",
+    "monitor/polar_hrv.py": "c0799d4234f1d6b39c6a1c1a82909bfd745b58d01138c5bfd4403db3550313a1",
+    "monitor/muse_notify.py": "b194b992f10b2f922069e8478e08f8011e0655f7f9813afd27417c0206b1d5ae",
+    "monitor/processor.py": "b851abc84a864db859d6cc707f797dae88adf597bc64b3cee17bb2594bb2f97b",
+    "monitor/frame_buffer.py": "33a6c301cf38808489e36df7da292457dfdce951f5d38b24cf822c49d07796bf",
+    "monitor/rolling_buffer.py": "8c825a7bc7791aae77d5719c94941da6987ff1de1cbf6e4c4391a2b4e5952a97",
+    "monitor/decoder.py": "10980d0f131a049e3c6b249eecf356e4e7851d45624ea071a00cdf081a071f5e",
+    "monitor/emotibit.py": "132df220aa768bc79583aacbd4460019011c0d7b0212cbc9269bd6f90530472b",
+    "monitor/respiration.py": "9325c023e7e753586a01bca2734aaf13e8bcc997b8ac978d2a70a69048154c1e",
+    "monitor/run_all_sensors.sh": "d6a49555784ae61d697ed6e5c548165a82cb3d83df4cc0fb111802600df4587e",
+    "monitor/requirements.txt": "a1547481a775e3405f8aee4c5959eedbb1580ebf4b1033dde3d3fef612e56388",
+    "music_demo/polar_hrv.py": "7b53e950644bf53cc896f2bd5c4bce02dff29736944c6de587b46ec95e31aa65",
+    "music_demo/polar_run.py": "0308df46e6f1bd652ff15fa7da000444369f06f593d4224550ff260186ef1d16",
+    "music_demo/controller.py": "eeaaac683b551335026b29cb34caa890355fc295316a8c0d72e848d932e16c88",
+    "music_demo/audio_engine.py": "ef9833f2bd5154ca80b37cdddf9497cde866cdbadd2fa14d4ba0b1fd66dc98dc",
+    "music_demo/start_biofeedback.sh": "1e24ab9b9c23989754dfb6910c1742dffb0433d15ed8a9698313d6e84d4bcf2f",
+    "lighting/light.py": "237ec2a9e229c714d34eb951ca78326b5c4adc8bc41b4aca84cda174512fecd2",
+    "lighting/requirements.txt": "4a61478242ad5e8b33b66edaa487a5a8260616bf92ce665d195a3c79a7802cbd",
+    "lighting/README.md": "f6192f4b13e9326d170924e6049ca6993c991a4979db9b764eabb0e1c610439c",
+    "lighting/vendor/amaran_protocol/__init__.py": "695394d2fda91146515af87990f6420774c95ec2b7c3bea828df0a1d7f19bb51",
+    "lighting/vendor/amaran_protocol/protocol.py": "7805227a65323ad6ad1d32644d4599e2dee1a41c0c050f3570c112398c1b76c9",
+    "lighting/vendor/amaran_protocol/const.py": "83a514cac6393d160dcdafa29bb8389ad8fc2e7445d18695339243573bcdb1dd",
+    "lighting/vendor/amaran_protocol/effects.py": "649ad42f47333ac2559ead9183dff3f2ad0c4db03b2dc704f746da0817e8def6",
+    "lighting/vendor/amaran_protocol/LICENSE": "ce16b64a19c69d72d28fec3f9318badbb25217121c58a84845fb706c0d346c4c",
+    "lighting/vendor/amaran_protocol/SOURCE.json": "19e0f4d7e07b2796e1b9cd1f321ce09d37c4da241b3cd28a4e7c1280ce5701b6"
+  },
+  "environments": {
+    "monitor": {
+      "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+      "packages": {
+        "bleak": "1.1.1",
+        "numpy": "2.3.5",
+        "scipy": "1.16.3",
+        "matplotlib": "3.10.7",
+        "python-vlc": "3.0.21203",
+        "godirect": "1.2.1"
+      }
+    },
+    "music_demo": {
+      "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+      "packages": {
+        "bleak": "1.1.1",
+        "numpy": "2.3.5",
+        "scipy": "1.16.3",
+        "matplotlib": "3.10.7",
+        "python-vlc": "3.0.21203",
+        "godirect": "1.2.1"
+      }
+    },
+    "lighting": {
+      "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+      "packages": {
+        "bleak": "1.1.1",
+        "numpy": "2.2.4",
+        "cryptography": "43.0.0",
+        "pyserial": "3.5"
+      }
+    }
+  }
+}

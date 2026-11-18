@@ -1,0 +1,18 @@
++{
+  "repository": "neyako/amaran-hacs",
+  "license": "MIT",
+  "files": {
+    "protocol.py": {
+      "sha": "18a46fef58cc24d96974e53cc4a728036ceb8cb5",
+      "url": "https://github.com/neyako/amaran-hacs/blob/main/custom_components/amaran/protocol.py"
+    },
+    "effects.py": {
+      "sha": "a2af251b3bcf5b879ea6f3e672243d428778bb59",
+      "url": "https://github.com/neyako/amaran-hacs/blob/main/custom_components/amaran/effects.py"
+    },
+    "const.py": {
+      "sha": "9b1c1586a07bb9312219eb126e0eeae741d14738",
+      "url": "https://github.com/neyako/amaran-hacs/blob/main/custom_components/amaran/const.py"
+    }
+  }
+}
