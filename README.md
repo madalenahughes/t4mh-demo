@@ -98,3 +98,37 @@ python3 tools/publish_code.py --remote https://github.com/madalenahughes/t4mh-de
 The publisher stages only the code/documentation/test directories listed in the script, checks staged paths for media/data/private files, makes a commit if needed, and pushes without force. GitHub authentication may need completing in your terminal. It does not create the GitHub repository or make it public.
 
 Nonhardware tests verify calculations, log fields, module separation and launcher cleanup. They cannot establish live BLE reliability, sound output or physiological benefit; rehearse the two real demos after installation.
+
+
+## Session graphs after each demonstration
+
+Stop the recording with Ctrl+C (or let the music demo finish), then on the Pi:
+
+```bash
+cd ~/t4mh_demo
+./demo.sh graph music
+./demo.sh graph monitor
+```
+
+Each command selects the latest matching session directory by its timestamped name, reads its CSVs without changing them, and saves PNGs plus an offline `index.html` report in that session's `plots/` folder. No synthetic fallback or new physiological filtering is applied. If the newest session is empty, it reports that instead of silently showing an older participant's session.
+
+The music figure aligns RMSSD/baseline with commanded playback rate and volume, shading the logged phases. The initial RR warm-up is excluded from its recorded time axis. The monitoring report includes a combined overview and detailed HRV, EEG, respiration and EmotiBit figures. Monitoring panels share one Unix-time origin: a later-starting signal is not shifted back to zero. Missing streams remain blank. Long gaps are disconnected. Temperature is displayed in Fahrenheit from the logged Celsius values.
+
+Completed fixed-playback logs that overlap the monitor's recorded interval provide blue music shading. A specific playback log or older session can be chosen:
+
+```bash
+./demo.sh graph monitor --session data/monitor_TIMESTAMP
+./demo.sh graph monitor --session data/monitor_TIMESTAMP --playback data/play_TIMESTAMP/playback.json
+./demo.sh graph music --session data/music_TIMESTAMP
+```
+
+For an SSH-only Pi, run this on the Mac to generate, download and open the latest report (after installing the plotting update):
+
+```bash
+bash /private/tmp/t4mh-review-session.sh music
+bash /private/tmp/t4mh-review-session.sh monitor
+```
+
+The Mac wrapper downloads only the generated report/figures into `~/Downloads/t4mh-session-graphs/`, then opens the local HTML file. A plain browser is enough; no server or internet is required to view the downloaded report. Generated figures and recordings stay under ignored `data/`, not in GitHub.
+
+These are recorded processed features, not raw EEG voltage waveforms. EmotiBit packet samples share arrival timestamps; different sensors have different processing/transport delays. Alignment is useful context, not evidence of precise synchronization or causation. Quality labels in acquisition remain heuristic; the plots do not turn noisy measurements into clean ones.

@@ -184,9 +184,12 @@ def main(argv=None):
     sub.add_parser('dashboard',help='Display messages from separately started sensor processes')
     p=sub.add_parser('light',help='Standalone light control using the existing private settings')
     p.add_argument('arguments',nargs=argparse.REMAINDER)
+    p=sub.add_parser('graph',help='Create PNG plots and an offline report from a recorded session')
+    p.add_argument('arguments',nargs=argparse.REMAINDER)
     sub.add_parser('doctor',help='Nonhardware environment check')
     sub.add_parser('check',help='Run nonhardware regression tests')
     args=parser.parse_args(argv)
+    if args.mode=='graph':return subprocess.call([sys.executable,str(ROOT/'tools/plot_sessions.py'),*args.arguments])
     if args.mode=='doctor':return doctor()
     if args.mode=='check':return subprocess.call([sys.executable,str(ROOT/'tools/check.py')])
     if args.mode=='light':

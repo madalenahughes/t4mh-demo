@@ -10,7 +10,7 @@ def main():
     env=os.environ.copy()
     env.pop('T4MH_DATA_DIR',None);env.pop('T4MH_MUSIC_LOG_DIR',None)
     env.setdefault('MPLBACKEND','Agg')
-    for suite in ['music','muse','fba','polar','launcher']:
+    for suite in ['music','muse','fba','polar','launcher','plotting']:
         print('\nChecking '+suite+'...',flush=True)
         completed=subprocess.run([sys.executable,'-m','unittest','discover','-s',str(ROOT/'tests'/suite),'-p','test_*.py','-v'],env=env,cwd=ROOT)
         if completed.returncode:return completed.returncode
